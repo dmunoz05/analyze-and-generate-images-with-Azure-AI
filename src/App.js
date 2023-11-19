@@ -3,7 +3,7 @@ import './App.css';
 import FooterLayout from './footer';
 
 function App() {
-  const value = 'World';
+  
   return (
     <>
       <div className='flex flex-col items-center w-full gap-7'>
