@@ -1,3 +1,5 @@
+import React from 'react';
+
 function FooterLayout() {
     return (
         <div className='w-auto flex flex-row justify-center p-2 absolute bottom-0 left-0 right-0 bg-slate-900'>
