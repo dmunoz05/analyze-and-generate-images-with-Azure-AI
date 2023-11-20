@@ -1,6 +1,6 @@
 import React, { useState } from 'react';
 import './App.css';
-import FooterLayout from './footer';
+import FooterLayout from '../layout/footer';
 
 function App() {
 
