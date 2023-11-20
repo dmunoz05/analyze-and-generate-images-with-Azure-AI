@@ -8,10 +8,7 @@ function App() {
   const [result, setResult] = useState(null);
 
   const analyzeImage = async () => {
-
-    debugger;
-
-    const subscriptionKey = process.env.SUBSCRIPTION_KEY;
+    const subscriptionKey = process.env.REACT_APP_SUBSCRIPTION_KEY;
     const apiUrl = process.env.API_ANALYZER_URL;
     const imageUrl = textInput;
 
@@ -43,8 +40,6 @@ function App() {
     const urlApi = process.env.API_GENETATE_URL;
 
     try {
-      debugger;
-
       const response = await fetch(urlApi, {
         method: 'POST',
         headers: {
@@ -58,7 +53,6 @@ function App() {
           "size": "1024x1024"
         })
       })
-      debugger;
       if (response.ok) {
         const data = await response.json();
         setResult(data);
@@ -86,7 +80,7 @@ function App() {
 
         <div className='flex flex-row justify-center items-center gap-5'>
           <button onClick={() => analyzeImage()} className="btn">
-            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-scan-eye" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+            <svg xmlns="http://www.w3.org/2000/svg" className="icon icon-tabler icon-tabler-scan-eye" width="24" height="24" viewBox="0 0 24 24" strokeWidth="2" stroke="currentColor" fill="none" strokeLinecap="round" strokeLinejoin="round">
               <path stroke="none" d="M0 0h24v24H0z" fill="none" />
               <path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
               <path d="M4 16v2a2 2 0 0 0 2 2h2" />
