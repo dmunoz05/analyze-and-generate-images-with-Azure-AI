@@ -1,22 +1,78 @@
-import React from 'react';
+import React, { useState } from 'react';
 import './App.css';
 import FooterLayout from './footer';
 
 function App() {
+  
+  const [textInput, setTextInput] = useState('');
+  const [result, setResult] = useState(null);
 
+  const analyzeImage = async () => {
 
-  function analyzateImage() {
     debugger;
-    var url = document.getElementsByName("text")[0].value;
-    var xhr = new XMLHttpRequest();
-    xhr.open('GET', 'https://api.aitextgen.app/generate?apiKey=YOUR_API_KEY&text=' + url, true);
-    xhr.send();
-    xhr.onload = function () {
-      var image = document.getElementById("image");
-      image.src = JSON.parse(xhr.response).data[0].image;
+
+    const subscriptionKey = process.env.SUBSCRIPTION_KEY;
+    const apiUrl = process.env.API_ANALYZER_URL;
+    const imageUrl = textInput;
+
+    try {
+      const response = await fetch(apiUrl, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Ocp-Apim-Subscription-Key': subscriptionKey,
+        },
+        body: JSON.stringify({ url: imageUrl }),
+      });
+
+      if (response.ok) {
+        const data = await response.json();
+        setResult(data);
+      } else {
+        console.error('Error:', response.status);
+        setResult(null);
+      }
+    } catch (error) {
+      console.error('Error:', error);
+      setResult(null);
+    }
+  };
+
+  const generateImage = async () => {
+    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
+    const urlApi = process.env.API_GENETATE_URL;
+
+    try {
+      debugger;
+
+      const response = await fetch(urlApi, {
+        method: 'POST',
+        headers: {
+          'Content-Type': 'application/json',
+          'Authorization': `Bearer ${OPENAI_API_KEY}`
+        },
+        body: JSON.stringify({
+          "model": "dall-e-2",
+          "prompt": "A cute baby sea otter",
+          "n": 1,
+          "size": "1024x1024"     
+        })
+      })
+      debugger;
+      if (response.ok) {
+        const data = await response.json();
+        setResult(data);
+      } else {
+        console.error('Error:', response.status);
+        setResult(null);
+      }
+
+    } catch (error) {
+      console.error('Error:', error);
+      setResult(null);
     }
   }
-  
+
   return (
     <>
       <div className='flex flex-col items-center w-full gap-7'>
@@ -26,10 +82,10 @@ function App() {
 
 
         <br />
-        <input type='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
+        <input onChange={(e) => setTextInput(e.target.value)} type='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
 
         <div className='flex flex-row justify-center items-center gap-5'>
-          <button onClick={analyzateImage} className="btn">
+          <button onClick={() => analyzeImage()} className="btn">
             <svg height='24' width='24' fill='#FFFFFF' viewBox='0 0 24 24' data-name='Layer 1' id='Layer_1' className='sparkle'>
               <path d='M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z'></path>
             </svg>
@@ -37,7 +93,7 @@ function App() {
             <span className='text'>Analyzate</span>
           </button>
 
-          <button className='btn'>
+          <button onClick={() => generateImage()} className='btn'>
             <svg height='24' width='24' fill='#FFFFFF' viewBox='0 0 24 24' data-name='Layer 1' id='Layer_1' className='sparkle'>
               <path d='M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z'></path>
             </svg>
@@ -46,6 +102,7 @@ function App() {
           </button>
         </div>
 
+        <p>{result?.captionResult?.text}</p>
         <img alt='' src='' id='image' className='w-full' />
       </div>
       <FooterLayout />
