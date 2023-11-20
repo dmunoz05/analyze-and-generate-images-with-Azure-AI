@@ -3,7 +3,7 @@ import './App.css';
 import FooterLayout from './footer';
 
 function App() {
-  
+
   const [textInput, setTextInput] = useState('');
   const [result, setResult] = useState(null);
 
@@ -55,7 +55,7 @@ function App() {
           "model": "dall-e-2",
           "prompt": "A cute baby sea otter",
           "n": 1,
-          "size": "1024x1024"     
+          "size": "1024x1024"
         })
       })
       debugger;
@@ -86,8 +86,15 @@ function App() {
 
         <div className='flex flex-row justify-center items-center gap-5'>
           <button onClick={() => analyzeImage()} className="btn">
-            <svg height='24' width='24' fill='#FFFFFF' viewBox='0 0 24 24' data-name='Layer 1' id='Layer_1' className='sparkle'>
-              <path d='M10,21.236,6.755,14.745.264,11.5,6.755,8.255,10,1.764l3.245,6.491L19.736,11.5l-6.491,3.245ZM18,21l1.5,3L21,21l3-1.5L21,18l-1.5-3L18,18l-3,1.5ZM19.333,4.667,20.5,7l1.167-2.333L24,3.5,21.667,2.333,20.5,0,19.333,2.333,17,3.5Z'></path>
+            <svg xmlns="http://www.w3.org/2000/svg" class="icon icon-tabler icon-tabler-scan-eye" width="24" height="24" viewBox="0 0 24 24" stroke-width="2" stroke="currentColor" fill="none" stroke-linecap="round" stroke-linejoin="round">
+              <path stroke="none" d="M0 0h24v24H0z" fill="none" />
+              <path d="M4 8v-2a2 2 0 0 1 2 -2h2" />
+              <path d="M4 16v2a2 2 0 0 0 2 2h2" />
+              <path d="M16 4h2a2 2 0 0 1 2 2v2" />
+              <path d="M16 20h2a2 2 0 0 0 2 -2v-2" />
+              <path d="M7 12c3.333 -4.667 6.667 -4.667 10 0" />
+              <path d="M7 12c3.333 4.667 6.667 4.667 10 0" />
+              <path d="M12 12h-.01" />
             </svg>
 
             <span className='text'>Analyzate</span>
