@@ -1,16 +1,22 @@
 import React, { useState } from 'react';
 import './App.css';
 import FooterLayout from '../layout/footer';
+// import axios from 'axios';
+import { fadeIn } from '../utils/motionTransitions.ts'
+import { motion } from 'framer-motion'
 
 function App() {
 
-  const [textInput, setTextInput] = useState('');
+  const [prompt, setPrompt] = useState('');
   const [result, setResult] = useState(null);
+  const [generatedImages, setGeneratedImages] = useState([]);
+  const [isLoading, setIsLoading] = useState(false);
+  // const [keyOpenIA, setKeyOpenIA] = useState('');
 
   const analyzeImage = async () => {
     const subscriptionKey = process.env.REACT_APP_SUBSCRIPTION_KEY;
-    const apiUrl = process.env.API_ANALYZER_URL;
-    const imageUrl = textInput;
+    const apiUrl = process.env.REACT_APP_API_ANALYZER_URL;
+    const imageUrl = prompt;
 
     try {
       const response = await fetch(apiUrl, {
@@ -35,48 +41,57 @@ function App() {
     }
   };
 
-  const generateImage = async () => {
-    const OPENAI_API_KEY = process.env.OPENAI_API_KEY;
-    const urlApi = process.env.API_GENETATE_URL;
+  async function generateImage() {
+    setIsLoading(true);
 
-    try {
-      const response = await fetch(urlApi, {
-        method: 'POST',
-        headers: {
-          'Content-Type': 'application/json',
-          'Authorization': `Bearer ${OPENAI_API_KEY}`
-        },
-        body: JSON.stringify({
-          "model": "dall-e-2",
-          "prompt": "A cute baby sea otter",
-          "n": 1,
-          "size": "1024x1024"
-        })
-      })
-      if (response.ok) {
-        const data = await response.json();
-        setResult(data);
-      } else {
-        console.error('Error:', response.status);
-        setResult(null);
-      }
+    // try {
+    //   const requestData = {
+    //     prompt: prompt,
+    //     n: 2,
+    //     size: '256x256',
+    //   };
 
-    } catch (error) {
-      console.error('Error:', error);
-      setResult(null);
-    }
+    //   const headers = {
+    //     'Content-Type': 'application/json',
+    //     Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+    //   };
+
+    //   const response = await axios.post(process.env.REACT_APP_API_GENETATE_IMAGE_URL, requestData, {
+    //     headers: headers,
+    //   });
+
+    // setGeneratedImages(response.data.data);
+    // } catch (error) {
+    //   console.error('Error generating images:', error);
+    // } finally {
+    //   setIsLoading(false);
+    // }
+
+    setTimeout(() => {
+      const dataImages = [{ "url": "https://moderatorsampleimages.blob.core.windows.net/samples/sample16.png" }, { "url": "https://moderatorsampleimages.blob.core.windows.net/samples/sample16.png" }];
+      setGeneratedImages(dataImages);
+      setIsLoading(false);
+    }, 3000);
   }
 
   return (
     <>
-      <div className='flex flex-col items-center w-full gap-7'>
-        <h1 className='font-bold'>Computer Vision</h1>
+      <div className='flex flex-col items-center w-full gap-7 z-10'>
+        <motion.div className="hidden w-auto h-auto mx-auto md:block"
+          variants={fadeIn('right', 0.5)}
+          initial="hidden"
+          animate="show"
+          exit="hidden"
+        >
+          <h1 className='font-bold'>Computer Vision</h1>
 
-        <p>This is a app for generate images using Azure AI.</p>
+          <br />
 
+          <p>This is a app for generate images using Azure AI.</p>
+        </motion.div>
 
         <br />
-        <input onChange={(e) => setTextInput(e.target.value)} type='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
+        <input onChange={(e) => setPrompt(e.target.value)} type='text' id='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
 
         <div className='flex flex-row justify-center items-center gap-5'>
           <button onClick={() => analyzeImage()} className="btn">
@@ -91,7 +106,7 @@ function App() {
               <path d="M12 12h-.01" />
             </svg>
 
-            <span className='text'>Analyzate</span>
+            <span className='text'> Analyzate </span>
           </button>
 
           <button onClick={() => generateImage()} className='btn'>
@@ -104,9 +119,39 @@ function App() {
         </div>
 
         <p>{result?.captionResult?.text}</p>
-        <img alt='' src='' id='image' className='w-full' />
+        {generatedImages.length > 0 && (
+          <div className="mt-4">
+            {generatedImages.map((image, index) => (
+              <div key={index} className="mt-4">
+                <img
+                  width={256}
+                  height={256}
+                  src={image.url}
+                  alt={`Generated Img ${index}`}
+                  style={{ maxWidth: '100%', height: 'auto' }}
+                />
+              </div>
+            ))}
+          </div>
+        )}
+
+        {
+          isLoading && (
+            <>
+              <div className='absolute z-10 bg-black opacity-80 top-0 bottom-0 left-0 right-0
+              backdrop-filter backdrop- blur-sm'>
+              </div>
+              <p className='font-bold text-4xl z-20'>Loading ...</p>
+              <div className='spinner fixed z-20'>
+                <div className='spinner1'></div>
+              </div>
+            </>
+          )
+        }
+
+
+        <FooterLayout />
       </div>
-      <FooterLayout />
     </>
   );
 }
