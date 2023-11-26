@@ -1,7 +1,7 @@
 import React, { useState } from 'react';
 import './App.css';
 import FooterLayout from '../layout/footer';
-// import axios from 'axios';
+import axios from 'axios';
 import { fadeIn } from '../utils/motionTransitions.ts'
 import { motion } from 'framer-motion'
 import ReactModal from '../components/Modal/ReactModal.jsx';
@@ -13,11 +13,36 @@ function App() {
   const [generatedImages, setGeneratedImages] = useState([]);
   const [isLoading, setIsLoading] = useState(false);
   const [messageLoading, setMessageLoading] = useState('');
-  // const [keyOpenIA, setKeyOpenIA] = useState('');
   const [openModal, setOpenModal] = useState(false);
   const [message, setMessage] = useState('');
   const [typeModal, setTypeModal] = useState('');
 
+
+  function closeModal() {
+    setOpenModal(false);
+    setPrompt('');
+    // setTypeModal('');
+    setAnalyzateImage(null);
+    setGeneratedImages([]);
+  }
+
+  function validarURLAgain(url) {
+    const urlPattern = /^https:\/\/[^\s/$.?#].[^\s]*$/i;
+    return urlPattern.test(url);
+  }
+
+  function validarURL(url) {
+    try {
+      new URL(url);
+      const valid = validarURLAgain(url);
+      if (valid) {
+        return true;
+      }
+      return false;
+    } catch (error) {
+      return false;
+    }
+  }
 
   function validateInputEmpty() {
     if (prompt.trim() === '') {
@@ -26,11 +51,49 @@ function App() {
     return false;
   }
 
+  const writePrompt = (value) => {
+    setPrompt(value)
+  }
+
+  function errorKeyInserted() {
+    setIsLoading(true);
+    setMessageLoading('Validating inserted key...');
+    setOpenModal(false);
+
+    setTimeout(() => {
+      setTypeModal('errorInput')
+      setMessage('Wrong key inserted...')
+      setOpenModal(true)
+      setIsLoading(false);
+    }, 2500);
+  }
+
+
+  function validateKeyGenerateImg() {
+    const emptyValue = validateInputEmpty();
+    if (emptyValue) {
+      setTypeModal('errorInput')
+      setMessage('Please enter a text...')
+      setOpenModal(true)
+      return;
+    }
+    setOpenModal(true);
+    setTypeModal('generateImage');
+  }
+
   const analyzeImage = async () => {
     const emptyValue = validateInputEmpty();
     if (emptyValue) {
-      setTypeModal('inputEmpty')
+      setTypeModal('errorInput')
       setMessage('Please enter a text...')
+      setOpenModal(true)
+      return;
+    }
+
+    const validURL = validarURL(prompt);
+    if (!validURL) {
+      setTypeModal('errorInput')
+      setMessage('Insert a url valid...');
       setOpenModal(true)
       return;
     }
@@ -57,8 +120,10 @@ function App() {
         setAnalyzateImage(data);
         setTypeModal('analyzateImage');
       } else {
-        console.error('Error:', response.status);
-        setAnalyzateImage(null);
+        setTypeModal('errorAnalyzateImage')
+        setAnalyzateImage(response);
+        setMessage('Valid the url inserted...');
+        setOpenModal(true)
       }
     } catch (error) {
       console.error('Error:', error);
@@ -68,71 +133,43 @@ function App() {
     }
   };
 
-  // const generateImage = async () => {
-  //   try {
-  //     const requestData = {
-  //       prompt: prompt,
-  //       n: 2,
-  //       size: '256x256',
-  //     };
+  const generateImage = async () => {
+    setMessageLoading('Wait, generating images...');
+    setIsLoading(true);
+    try {
+      const requestData = {
+        prompt: prompt,
+        n: 2,
+        size: '1024x1024',
+      };
 
-  //     const headers = {
-  //       'Content-Type': 'application/json',
-  //       Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
-  //     };
+      const headers = {
+        'Content-Type': 'application/json',
+        Authorization: `Bearer ${process.env.REACT_APP_OPENAI_API_KEY}`,
+      };
 
-  //     const response = await axios.post(process.env.REACT_APP_API_GENETATE_IMAGE_URL, requestData, {
-  //       headers: headers,
-  //     });
+      const response = await axios.post(process.env.REACT_APP_API_GENETATE_IMAGE_URL, requestData, {
+        headers: headers,
+      });
 
-  //   setGeneratedImages(response.data.data);
-  //   } catch (error) {
-  //     console.error('Error generating images:', error);
-  //   } finally {
-  //     setIsLoading(false);
-  //   }
-  // }
-
-  function validateKeyGenerateImg() {
-    const emptyValue = validateInputEmpty();
-    if (emptyValue) {
+      setGeneratedImages(response.data.data);
       setOpenModal(true);
-      setMessage('Please enter a text...');
-      return;
+    } catch (error) {
+      setMessage('Error generating images...');
+      setTypeModal('errorGenerateImage');
+      setGeneratedImages(error.response);
+      setIsLoading(false);
+      setOpenModal(true);
+    } finally {
+      setIsLoading(false);
     }
 
-    setIsLoading(true);
-    setMessageLoading('Generating image ...')
-    setTimeout(() => {
-
-      setOpenModal(true);
-      setMessage('Wait, generating images...');
-      setTypeModal('generateImage');
-
-      const dataImages = [{ "url": "https://moderatorsampleimages.blob.core.windows.net/samples/sample16.png" }, { "url": "https://moderatorsampleimages.blob.core.windows.net/samples/sample16.png" }];
-      setGeneratedImages(dataImages);
-      setIsLoading(false);
-    }, 2000)
   }
 
   return (
     <>
-
-      {
-        openModal && (
-          <ReactModal
-            analyzeImage={analyzateImage}
-            generateImage={generatedImages}
-            typeModal={typeModal}
-            closeModal={() => setOpenModal(false)}
-            modalIsOpen={openModal}
-            message={message}
-          />
-        )
-      }
-
       <div className='flex flex-col items-center w-full gap-7 z-10'>
-        <motion.div className="hidden w-auto h-auto mx-auto md:block"
+        <motion.div className="w-auto h-auto mx-auto block"
           variants={fadeIn('right', 0.5)}
           initial="hidden"
           animate="show"
@@ -146,7 +183,10 @@ function App() {
         </motion.div>
 
         <br />
-        <input autoComplete='off' onChange={(e) => setPrompt(e.target.value)} type='text' id='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
+
+        <div className='flex flex-row gap-3 '>
+          <input autoComplete='off' onChange={(e) => writePrompt(e.target.value)} value={prompt} type='text' id='text' name='text' className='input' placeholder='Enter URL to analyzate or textual prompt to genera at image' />
+        </div>
 
         <div className='flex flex-row justify-center items-center gap-5'>
           <button onClick={() => analyzeImage()} className="btn">
@@ -172,6 +212,21 @@ function App() {
             <span className='text'>Generate</span>
           </button>
         </div>
+
+        {
+          openModal && (
+            <ReactModal
+              analyzeImage={analyzateImage}
+              generatedImages={generatedImages}
+              generateImage={() => generateImage()}
+              typeModal={typeModal}
+              closeModal={closeModal}
+              modalIsOpen={openModal}
+              message={message}
+              errorKeyInserted={errorKeyInserted}
+            />
+          )
+        }
 
         {
           isLoading && (

@@ -1,7 +1,6 @@
 #root {
     max-width: 1280px;
     margin: 0 auto;
-    padding: 2rem;
     text-align: center;
     display: grid;
     justify-items: center;
@@ -49,6 +48,7 @@
 
 /* Button generate */
 .btn {
+    outline: none;
     animation: 3s ease-in 1s reverse both running slideinBtn;
     border: none;
     width: 12em;
