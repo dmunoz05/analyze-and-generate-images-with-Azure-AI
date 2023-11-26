@@ -38,8 +38,6 @@ function ReactModal({ analyzeImage, generatedImages, generateImage, typeModal, c
     <Modal
       ariaHideApp={false}
       isOpen={modalIsOpen}
-      // onAfterOpen={afterOpenModal}
-      // onRequestClose={}
       style={customStyles}
     >
 
@@ -102,7 +100,7 @@ function ReactModal({ analyzeImage, generatedImages, generateImage, typeModal, c
               </div>
             </div>
           </div>
-          <div className="flex gap-5 justify-end">
+          <div className="flex gap-5 justify-center">
             <button
               onClick={closeModal}
               className="outline-none cursor-pointer bg-gradient-to-r from-purple-600 via-purple-400 to-blue-500 text-white px-6 py-2 font-bold rounded-full hover:opacity-80"

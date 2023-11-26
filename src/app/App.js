@@ -21,7 +21,6 @@ function App() {
   function closeModal() {
     setOpenModal(false);
     setPrompt('');
-    // setTypeModal('');
     setAnalyzateImage(null);
     setGeneratedImages([]);
   }
